@@ -6,14 +6,14 @@ RUN mvn dependency:go-offline
 COPY src ./src
 RUN mvn clean package -DskipTests
 
-# Run stage - using slim Debian-based image
-FROM eclipse-temurin:17-jre-slim
+# Run stage - using Alpine for small size
+FROM eclipse-temurin:17-jdk-alpine
 WORKDIR /app
 COPY --from=build /app/target/eventra-*.jar app.jar
 
 # Create non-root user
-RUN addgroup --system --gid 1001 appgroup && \
-    adduser --system --uid 1001 --gid 1001 appuser
+RUN addgroup -g 1001 appgroup && \
+    adduser -u 1001 -G appgroup -s /bin/sh -D appuser
 USER appuser
 
 EXPOSE ${PORT:-8080}
