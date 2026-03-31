@@ -16,8 +16,6 @@ RUN addgroup --system --gid 1001 appgroup && \
     adduser --system --uid 1001 --gid 1001 appuser
 USER appuser
 
-# Use Render's PORT environment variable
 EXPOSE ${PORT:-8080}
 
-# Start the application
 ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=prod"]
