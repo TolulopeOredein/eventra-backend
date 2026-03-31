@@ -1,0 +1,31 @@
+# Compiled files
+target/
+*.jar
+*.war
+*.ear
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.classpath
+.project
+.settings/
+.vscode/
+
+# Logs
+logs/
+*.log
+
+# Environment
+.env
+application-local.yml
+application-docker.yml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test
+test-output/

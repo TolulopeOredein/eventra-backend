@@ -1,0 +1,65 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: eventra-postgres
+    environment:
+      POSTGRES_DB: eventra
+      POSTGRES_USER: eventra_user
+      POSTGRES_PASSWORD: eventra_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eventra_user -d eventra"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - eventra-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: eventra-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - eventra-network
+
+  backend:
+    build: .
+    container_name: eventra-backend
+    ports:
+      - "9000:8080"   # ✅ FIXED: host 9000 -> container 8080
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DATABASE_URL: jdbc:postgresql://postgres:5432/eventra
+      DATABASE_USER: eventra_user
+      DATABASE_PASSWORD: eventra_password
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: mySecretKeyForJWTTokenGeneration123456789
+      SERVER_PORT: 8080   # Optional: explicitly set the server port
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - eventra-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  eventra-network:
+    driver: bridge
