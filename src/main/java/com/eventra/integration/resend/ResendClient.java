@@ -18,8 +18,7 @@ public class ResendClient {
     private final ResendConfig resendConfig;
 
     public void sendEmail(String to, String subject, String text, String html) {
-        // Skip if no API key configured
-        if (!StringUtils.hasText(resendConfig.getApiKey())) {
+        if (!resendConfig.isConfigured()) {
             log.warn("Resend API key not configured. Email not sent to: {}", to);
             return;
         }
