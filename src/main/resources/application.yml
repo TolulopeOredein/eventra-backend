@@ -3,31 +3,35 @@ spring:
     name: eventra
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
+  # Disable Redis autoconfiguration to avoid connection errors
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
 
+# Server configuration
 server:
   port: ${PORT:8080}
   compression:
     enabled: true
     mime-types: application/json,application/xml,text/html,text/xml,text/plain
 
+# Application configuration
 app:
   name: Eventra
   base-url: ${APP_BASE_URL:http://localhost:8080}
   frontend-url: ${FRONTEND_URL:http://localhost:3000}
-  jwt:
-    secret: ${JWT_SECRET:default-secret-key-change-in-production}
-    access-token-expiry: 900000
-    refresh-token-expiry: 604800000
-    bouncer-token-expiry: 43200000
 
+# Logging configuration
 logging:
   level:
-    com.eventra: DEBUG
-    org.springframework.security: INFO
-    org.hibernate.SQL: WARN
+    com.eventra: INFO
+    org.springframework: WARN
+    org.hibernate: WARN
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
 
+# Management endpoints (actuator)
 management:
   endpoints:
     web:
