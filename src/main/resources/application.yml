@@ -1,42 +1,52 @@
 spring:
   application:
     name: eventra
-  profiles:
-    active: ${SPRING_PROFILES_ACTIVE:dev}
-  # Disable Redis autoconfiguration to avoid connection errors
+  # Do NOT set profiles.active here - set it via environment variable
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
-      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
 
-# Server configuration
 server:
   port: ${PORT:8080}
-  compression:
-    enabled: true
-    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+  address: 0.0.0.0
 
-# Application configuration
-app:
-  name: Eventra
-  base-url: ${APP_BASE_URL:http://localhost:8080}
-  frontend-url: ${FRONTEND_URL:http://localhost:3000}
-
-# Logging configuration
 logging:
   level:
-    com.eventra: INFO
-    org.springframework: WARN
-    org.hibernate: WARN
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    root: INFO
+    com.eventra: DEBUG
 
-# Management endpoints (actuator)
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics
-  endpoint:
-    health:
-      show-details: always
+app:
+  jwt:
+    secret: ${JWT_SECRET:tempSecretKeyForRenderAtLeast32Chars}
+    access-token-expiry: 900000
+    refresh-token-expiry: 604800000
+
+---
+# Production profile - activated by SPRING_PROFILES_ACTIVE=prod
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  datasource:
+    url: jdbc:postgresql://aws-1-eu-west-1.pooler.supabase.com:5432/postgres?sslmode=require
+    username: postgres.lhqliiutgokossuzdzkn
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 30000
+      maximum-pool-size: 10
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
