@@ -1,12 +1,10 @@
 spring:
   application:
     name: eventra
-  # Do NOT set profiles.active here - set it via environment variable
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
-      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
-      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
 
 server:
   port: ${PORT:8080}
@@ -16,6 +14,7 @@ logging:
   level:
     root: INFO
     com.eventra: DEBUG
+    org.hibernate: WARN
 
 app:
   jwt:
@@ -24,7 +23,7 @@ app:
     refresh-token-expiry: 604800000
 
 ---
-# Production profile - activated by SPRING_PROFILES_ACTIVE=prod
+# Production profile
 spring:
   config:
     activate:
@@ -45,6 +44,9 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          lob:
+            non_contextual_creation: true
     show-sql: false
 
 app:
