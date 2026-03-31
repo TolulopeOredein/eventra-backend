@@ -1,32 +1,23 @@
-# Multi-stage build for Eventra Backend
-FROM maven:3.9-eclipse-temurin-21 AS builder
-
+# Build stage
+FROM maven:3.8.4-openjdk-17-slim AS build
 WORKDIR /app
-
-# Copy pom.xml first for dependency caching
 COPY pom.xml .
 RUN mvn dependency:go-offline
-
-# Copy source code and build
-COPY src src
+COPY src ./src
 RUN mvn clean package -DskipTests
 
-# Runtime stage
-FROM eclipse-temurin:21-jre-alpine
-
+# Run stage
+FROM openjdk:17-jdk-slim
 WORKDIR /app
+COPY --from=build /app/target/eventra-*.jar app.jar
 
 # Create non-root user
-RUN addgroup -S eventra && adduser -S eventra -G eventra
+RUN addgroup --system --gid 1001 appgroup && \
+    adduser --system --uid 1001 --gid 1001 appuser
+USER appuser
 
-# Copy JAR from builder
-COPY --from=builder /app/target/*.jar app.jar
+# Use Render's PORT environment variable
+EXPOSE ${PORT:-8080}
 
-# Change ownership
-RUN chown -R eventra:eventra /app
-
-USER eventra
-
-EXPOSE 9000
-
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Start the application
+ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=prod"]
