@@ -19,10 +19,12 @@
 
     <properties>
         <java.version>21</java.version>
+        <spring-modulith.version>1.1.0</spring-modulith.version>
         <twilio.version>10.6.0</twilio.version>
         <zxing.version>3.5.2</zxing.version>
         <opencsv.version>5.8</opencsv.version>
         <google-maps.version>2.2.0</google-maps.version>
+        <aws-sdk.version>2.20.0</aws-sdk.version>
         <jjwt.version>0.11.5</jjwt.version>
     </properties>
 
@@ -57,11 +59,40 @@
             <artifactId>spring-retry</artifactId>
         </dependency>
 
+
+        <!-- AWS SDK for S3 (Cloudflare R2 compatible) -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>${aws-sdk.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>auth</artifactId>
+            <version>${aws-sdk.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>regions</artifactId>
+            <version>${aws-sdk.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>http-client-spi</artifactId>
+            <version>${aws-sdk.version}</version>
+        </dependency>
         <!-- Database -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
+        </dependency>
+
+        <!-- WebSocket support for real-time updates -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
         </dependency>
 
         <!-- JWT -->
