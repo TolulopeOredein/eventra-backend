@@ -1,3 +1,4 @@
+// src/main/java/com/eventra/domain/event/Event.java
 package com.eventra.domain.event;
 
 import jakarta.persistence.*;
@@ -41,8 +42,7 @@ public class Event {
     private boolean beneficiaryVerified;
     private LocalDateTime beneficiaryVerifiedAt;
 
-    @Builder.Default
-    private String status = "draft";
+    private String status;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

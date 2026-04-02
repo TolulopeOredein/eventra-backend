@@ -23,12 +23,12 @@ public class GuestController {
     private final GuestService guestService;
 
     @PostMapping("/import")
-    public ResponseEntity<Integer> importGuests(
+    public ResponseEntity<GuestService.ImportResult> importGuests(
             @PathVariable UUID eventId,
             @RequestParam("file") MultipartFile file,
             @AuthenticationPrincipal UserDetails userDetails) {
-        int count = guestService.importGuests(eventId, file, userDetails.getUsername());
-        return ResponseEntity.ok(count);
+        GuestService.ImportResult result = guestService.importGuests(eventId, file, userDetails.getUsername());
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping

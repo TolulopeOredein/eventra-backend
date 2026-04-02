@@ -2,7 +2,6 @@
 package com.eventra.service;
 
 import com.opencsv.CSVReader;
-import com.opencsv.exceptions.CsvException;
 import com.eventra.domain.event.Event;
 import com.eventra.repository.EventRepository;
 import com.eventra.domain.guest.Guest;
@@ -22,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStreamReader;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,48 +38,73 @@ public class GuestService {
     private final NotificationService notificationService;
 
     @Transactional
-    public int importGuests(UUID eventId, MultipartFile file, String userEmail) {
+    public ImportResult importGuests(UUID eventId, MultipartFile file, String userEmail) {
         validateAccess(eventId, userEmail);
+
+        List<ImportError> errors = new ArrayList<>();
+        int imported = 0;
 
         try (CSVReader reader = new CSVReader(new InputStreamReader(file.getInputStream()))) {
             List<String[]> rows = reader.readAll();
-            if (rows.size() < 2) return 0;
+            if (rows.size() < 2) {
+                return ImportResult.failure("CSV file has no data rows");
+            }
 
             // Skip header row
             List<String[]> dataRows = rows.subList(1, rows.size());
-            int imported = 0;
 
-            for (String[] row : dataRows) {
-                if (row.length < 2) continue;
+            for (int i = 0; i < dataRows.size(); i++) {
+                String[] row = dataRows.get(i);
+                int rowNumber = i + 2; // +2 because header is row 1
 
-                String name = row[0];
-                String phone = row[1];
-                String email = row.length > 2 ? row[2] : null;
-                String tier = row.length > 3 ? row[3] : "regular";
+                if (row.length < 2) {
+                    errors.add(new ImportError(rowNumber, "Missing name or phone"));
+                    continue;
+                }
 
-                String normalizedPhone = phoneNumberUtil.normalize(phone);
+                String name = row[0].trim();
+                String phone = row[1].trim();
+                String email = row.length > 2 ? row[2].trim() : null;
+                String tier = row.length > 3 ? row[3].trim() : "regular";
 
-                Guest guest = Guest.builder()
-                        .eventId(eventId)
-                        .name(name)
-                        .phone(phone)
-                        .phoneNormalized(normalizedPhone)
-                        .email(email)
-                        .tier(tier)
-                        .rsvpStatus("pending")
-                        .build();
+                if (name.isEmpty()) {
+                    errors.add(new ImportError(rowNumber, "Name is required"));
+                    continue;
+                }
 
-                guestRepository.save(guest);
-                imported++;
+                if (phone.isEmpty()) {
+                    errors.add(new ImportError(rowNumber, "Phone is required"));
+                    continue;
+                }
+
+                try {
+                    String normalizedPhone = phoneNumberUtil.normalize(phone);
+
+                    Guest guest = Guest.builder()
+                            .eventId(eventId)
+                            .name(name)
+                            .phone(phone)
+                            .phoneNormalized(normalizedPhone)
+                            .email(email)
+                            .tier(tier)
+                            .rsvpStatus("pending")
+                            .build();
+
+                    guestRepository.save(guest);
+                    imported++;
+                } catch (Exception e) {
+                    errors.add(new ImportError(rowNumber, "Invalid phone number: " + phone));
+                }
             }
 
-            log.info("Imported {} guests for event: {}", imported, eventId);
-            return imported;
+            log.info("Imported {} guests for event: {} ({} errors)", imported, eventId, errors.size());
 
         } catch (Exception e) {
             log.error("Import failed", e);
             throw new RuntimeException("Import failed: " + e.getMessage());
         }
+
+        return ImportResult.success(imported, errors);
     }
 
     public Page<GuestResponse> getGuests(UUID eventId, String userEmail, Pageable pageable) {
@@ -111,6 +136,8 @@ public class GuestService {
                 .build();
 
         guest = guestRepository.save(guest);
+        log.info("Guest added: {} for event {}", guest.getName(), eventId);
+
         return mapToResponse(guest);
     }
 
@@ -148,6 +175,7 @@ public class GuestService {
             sent++;
         }
 
+        log.info("Sent {} invites for event {}", sent, eventId);
         return sent;
     }
 
@@ -157,6 +185,7 @@ public class GuestService {
         Guest guest = guestRepository.findByEventIdAndId(eventId, guestId)
                 .orElseThrow(() -> new RuntimeException("Guest not found"));
         guestRepository.delete(guest);
+        log.info("Guest deleted: {} from event {}", guestId, eventId);
     }
 
     private void validateAccess(UUID eventId, String userEmail) {
@@ -196,5 +225,47 @@ public class GuestService {
                 .checkInTime(guest.getCheckInTime())
                 .qrCodeUrl(guest.getQrCodeUrl())
                 .build();
+    }
+
+    // Inner class for import result
+    public static class ImportResult {
+        private final boolean success;
+        private final int importedCount;
+        private final List<ImportError> errors;
+        private final String errorMessage;
+
+        private ImportResult(boolean success, int importedCount, List<ImportError> errors, String errorMessage) {
+            this.success = success;
+            this.importedCount = importedCount;
+            this.errors = errors;
+            this.errorMessage = errorMessage;
+        }
+
+        public static ImportResult success(int importedCount, List<ImportError> errors) {
+            return new ImportResult(true, importedCount, errors, null);
+        }
+
+        public static ImportResult failure(String errorMessage) {
+            return new ImportResult(false, 0, new ArrayList<>(), errorMessage);
+        }
+
+        public boolean isSuccess() { return success; }
+        public int getImportedCount() { return importedCount; }
+        public List<ImportError> getErrors() { return errors; }
+        public String getErrorMessage() { return errorMessage; }
+        public boolean hasErrors() { return !errors.isEmpty(); }
+    }
+
+    public static class ImportError {
+        private final int row;
+        private final String message;
+
+        public ImportError(int row, String message) {
+            this.row = row;
+            this.message = message;
+        }
+
+        public int getRow() { return row; }
+        public String getMessage() { return message; }
     }
 }

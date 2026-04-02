@@ -1,3 +1,4 @@
+// src/main/java/com/eventra/controller/AuthController.java
 package com.eventra.controller;
 
 import com.eventra.dto.auth.LoginRequest;
@@ -23,11 +24,18 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
-        return ResponseEntity.ok(userService.login(request.getUsername(), request.getPassword()));
+        return ResponseEntity.ok(userService.login(request));
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponse> refresh(@RequestParam String refreshToken) {
         return ResponseEntity.ok(userService.refreshToken(refreshToken));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.substring(7);
+        userService.logout(token);
+        return ResponseEntity.ok().build();
     }
 }

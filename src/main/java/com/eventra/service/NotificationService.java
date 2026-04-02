@@ -12,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -24,17 +26,21 @@ public class NotificationService {
     private final UserRepository userRepository;
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy 'at' h:mm a");
 
+    /**
+     * Send invitation to a guest
+     */
     public void sendInvite(Guest guest, Event event, String inviteLink, String qrCodeUrl) {
         String message = buildInviteMessage(guest, event, inviteLink);
 
-        // Send WhatsApp with QR code media
+        // Send WhatsApp with QR code link
         try {
-            twilioClient.sendWhatsApp(guest.getPhone(), message, qrCodeUrl);
+            String whatsappMessage = message + "\n\n🎫 Your QR code: " + qrCodeUrl;
+            twilioClient.sendWhatsApp(guest.getPhone(), whatsappMessage);
         } catch (Exception e) {
             log.warn("WhatsApp failed for {}: {}", guest.getPhone(), e.getMessage());
         }
 
-        // Send Email
+        // Send Email with QR code as image
         if (guest.getEmail() != null) {
             try {
                 String subject = "You're invited to " + event.getName();
@@ -46,6 +52,9 @@ public class NotificationService {
         }
     }
 
+    /**
+     * Send welcome message after check-in
+     */
     public void sendWelcomeMessage(Guest guest, Event event) {
         String message = buildWelcomeMessage(guest, event);
         try {
@@ -55,6 +64,9 @@ public class NotificationService {
         }
     }
 
+    /**
+     * Send reminder to guest
+     */
     public void sendReminder(Guest guest, Event event, String reminderType) {
         String message = buildReminderMessage(guest, event, reminderType);
         try {
@@ -64,6 +76,9 @@ public class NotificationService {
         }
     }
 
+    /**
+     * Send beneficiary invitation (when planner creates event for couple)
+     */
     public void sendBeneficiaryInvitation(UUID eventId, String email, String phone, String name) {
         String inviteLink = "https://eventra.ng/claim/" + eventId;
         String message = String.format("""
@@ -97,6 +112,9 @@ public class NotificationService {
         }
     }
 
+    /**
+     * Notify creator that beneficiary claimed the event
+     */
     public void notifyCreatorBeneficiaryClaimed(UUID creatorId, Event event) {
         User creator = userRepository.findById(creatorId).orElseThrow();
 
@@ -114,6 +132,80 @@ public class NotificationService {
             twilioClient.sendWhatsApp(creator.getPhone(), message);
         } catch (Exception e) {
             log.warn("Notification to creator failed: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * Send RSVP confirmation to guest
+     */
+    public void sendRsvpConfirmation(Guest guest, Event event, String qrCodeUrl) {
+        String message = String.format("""
+            ✅ RSVP CONFIRMED! ✅
+            
+            Dear %s,
+            
+            Thank you for confirming your attendance to %s.
+            
+            🎫 YOUR ENTRY QR CODE
+            %s
+            
+            Save this QR code to your phone.
+            Present it at the gate for entry.
+            
+            Event: %s
+            Venue: %s
+            Time: %s
+            
+            We can't wait to celebrate with you! 🎉
+            """,
+                guest.getName(),
+                event.getName(),
+                qrCodeUrl,
+                event.getName(),
+                event.getVenue(),
+                event.getEventDate().format(DATE_FORMATTER)
+        );
+
+        try {
+            twilioClient.sendWhatsApp(guest.getPhone(), message);
+        } catch (Exception e) {
+            log.warn("RSVP confirmation failed: {}", e.getMessage());
+        }
+
+        if (guest.getEmail() != null) {
+            try {
+                resendClient.sendEmail(guest.getEmail(), "RSVP Confirmed: " + event.getName(), message, message);
+            } catch (Exception e) {
+                log.warn("Email RSVP confirmation failed: {}", e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Send thank you message after event
+     */
+    public void sendThankYou(Guest guest, Event event, String galleryLink) {
+        String message = String.format("""
+            💝 Thank You! 💝
+            
+            Dear %s,
+            
+            Thank you for celebrating %s with us!
+            Your presence made our day special.
+            
+            View event photos: %s
+            
+            We hope to see you again soon! 🎊
+            """,
+                guest.getName(),
+                event.getName(),
+                galleryLink
+        );
+
+        try {
+            twilioClient.sendWhatsApp(guest.getPhone(), message);
+        } catch (Exception e) {
+            log.warn("Thank you message failed: {}", e.getMessage());
         }
     }
 
@@ -184,6 +276,13 @@ public class NotificationService {
                 
                 Don't forget your QR code!
                 """, event.getName(), event.getEventDate().format(DATE_FORMATTER), event.getVenue());
+
+            case "TRAFFIC" -> String.format("""
+                🚗 Traffic Advisory for %s
+                
+                Leave by %s to arrive on time.
+                Estimated travel time: %d minutes.
+                """, event.getName(), "4:00 PM", 45);
 
             default -> "";
         };

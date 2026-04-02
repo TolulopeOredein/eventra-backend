@@ -1,3 +1,4 @@
+// src/main/java/com/eventra/service/EventService.java
 package com.eventra.service;
 
 import com.eventra.domain.event.Event;
@@ -14,6 +15,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -23,11 +27,17 @@ public class EventService {
 
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
+    private final PricingService pricingService;
 
     @Transactional
     public EventResponse createEvent(CreateEventRequest request, String creatorEmail) {
         User creator = userRepository.findByEmail(creatorEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Check if user can create event (free events remaining)
+        if (!pricingService.canCreateEvent(creator.getId())) {
+            throw new RuntimeException("You've used your 50 free events. Please join our waitlist for paid plans.");
+        }
 
         Event event = Event.builder()
                 .name(request.getName())
@@ -46,6 +56,11 @@ public class EventService {
                 .build();
 
         event = eventRepository.save(event);
+
+        // Use one free event
+        pricingService.useFreeEvent(creator.getId());
+
+        log.info("Event created: {} by user {}", event.getId(), creator.getEmail());
 
         return mapToResponse(event);
     }
@@ -96,6 +111,8 @@ public class EventService {
 
         event = eventRepository.save(event);
 
+        log.info("Event updated: {} by user {}", event.getId(), user.getEmail());
+
         return mapToResponse(event);
     }
 
@@ -112,6 +129,8 @@ public class EventService {
         }
 
         eventRepository.delete(event);
+
+        log.info("Event deleted: {} by user {}", eventId, user.getEmail());
     }
 
     private EventResponse mapToResponse(Event event) {

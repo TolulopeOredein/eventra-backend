@@ -31,6 +31,9 @@ public class User {
     private String phone;
 
     @Column(nullable = false)
+    private String phoneNormalized;
+
+    @Column(nullable = false)
     private String passwordHash;
 
     @Column(nullable = false)
@@ -39,20 +42,22 @@ public class User {
     @Column(nullable = false)
     private String lastName;
 
-    @Builder.Default
     private String role = "host";
-
-    @Builder.Default
     private String status = "active";
 
-    @Builder.Default
-    private boolean phoneVerified = false;
+    private boolean phoneVerified;
+    private boolean emailVerified;
+    private int verificationLevel;
 
-    @Builder.Default
-    private boolean emailVerified = false;
+    // Subscription fields
+    private String subscriptionTier = "free";
+    private String subscriptionStatus = "active";
+    private LocalDateTime subscriptionEndDate;
+    private boolean autoRenew = false;
 
-    @Builder.Default
-    private int verificationLevel = 0;
+    // Free event tracking
+    private int totalEventsCreated = 0;
+    private int freeEventsRemaining = 50;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -61,10 +66,7 @@ public class User {
     private LocalDateTime updatedAt;
 
     private LocalDateTime lastLogin;
-
-    @Builder.Default
-    private int failedLoginAttempts = 0;
-
+    private int failedLoginAttempts;
     private LocalDateTime lockedUntil;
 
     public String getFullName() {

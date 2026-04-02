@@ -28,8 +28,8 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .username(user.getEmail())
                 .password(user.getPasswordHash())
                 .authorities(List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole())))
-                .accountLocked(user.getStatus().equals("suspended"))
-                .disabled(!user.getStatus().equals("active"))
+                .accountLocked("suspended".equals(user.getStatus()))
+                .disabled(!"active".equals(user.getStatus()))
                 .build();
     }
 }

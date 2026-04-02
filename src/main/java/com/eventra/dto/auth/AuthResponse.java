@@ -23,5 +23,7 @@ public class AuthResponse {
         private String lastName;
         private String role;
         private int verificationLevel;
+        private String subscriptionTier;
+        private int freeEventsRemaining;
     }
 }

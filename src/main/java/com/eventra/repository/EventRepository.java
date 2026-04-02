@@ -1,9 +1,12 @@
+// src/main/java/com/eventra/repository/EventRepository.java
 package com.eventra.repository;
 
 import com.eventra.domain.event.Event;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -19,4 +22,8 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
 
     List<Event> findByStatusAndEventDateBetween(String status, LocalDateTime start, LocalDateTime end);
     List<Event> findByEventDateBetween(LocalDateTime start, LocalDateTime end);
+
+    // Add this method for counting active events
+    @Query("SELECT COUNT(e) FROM Event e WHERE e.createdBy = :userId AND e.status IN ('active', 'live')")
+    long countActiveEventsByCreator(@Param("userId") UUID userId);
 }
