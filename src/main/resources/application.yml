@@ -1,6 +1,10 @@
 spring:
+  main:
+    allow-circular-references: true
+
   application:
     name: eventra
+
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
@@ -26,6 +30,9 @@ google:
   maps:
     api-key: ${MAPS_API_KEY:} # Maps to the MAPS_API_KEY environment variable in Render
 
+
+
+
 ---
 # Production profile
 spring:
@@ -41,6 +48,7 @@ spring:
     hikari:
       connection-timeout: 30000
       maximum-pool-size: 10
+
 
   jpa:
     hibernate:
