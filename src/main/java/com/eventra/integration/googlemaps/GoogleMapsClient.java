@@ -11,12 +11,28 @@ import com.google.maps.model.TravelMode;
 import com.eventra.config.GoogleMapsConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component  // ← This annotation is CRITICAL
 @RequiredArgsConstructor
+@Configuration
 public class GoogleMapsClient {
+
+
+        @Value("${google.maps.api-key}")
+        private String apiKey;
+
+        @Bean
+        public GeoApiContext geoApiContext() {
+            return new GeoApiContext.Builder()
+                    .apiKey(apiKey)
+                    .build();
+        }
+
 
     private final GeoApiContext geoApiContext;
 
