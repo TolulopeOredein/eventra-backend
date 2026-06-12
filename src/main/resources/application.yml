@@ -31,7 +31,7 @@ google:
     api-key: ${MAPS_API_KEY:}
 
 ---
----
+# Production profile
 spring:
   config:
     activate:
@@ -43,15 +43,23 @@ spring:
     hikari:
       connection-timeout: 30000
       maximum-pool-size: 10
+      minimum-idle: 2
 
   jpa:
     database: POSTGRESQL
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         temp:
           use_jdbc_metadata_defaults: false
-    show-sql: false
+        jdbc:
+          lob:
+            non_contextual_creation: true
+    show-sql: true
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
