@@ -22,28 +22,45 @@ logging:
 
 app:
   jwt:
-    secret: ${JWT_SECRET:tempSecretKeyForRenderAtLeast32Chars}
+    secret: xK9mP2qR5tY8uI3oL7vB4nM1cZ6jF0eW2aX5sD8gJ1kL4
     access-token-expiry: 900000
     refresh-token-expiry: 604800000
 
 google:
   maps:
-    api-key: ${MAPS_API_KEY:}
+    api-key: AIzaSyA46QK2NAgB1f1XMSQ34d0ESeYCE2_1RNY
 
 ---
+# Production profile
 spring:
   config:
     activate:
       on-profile: prod
 
   datasource:
-    url: jdbc:postgresql://postgres.lhqliiutgokossuzdzkn:ADHwl47TSLEhqKx0@aws-1-eu-west-1.pooler.supabase.com:5432/postgres?sslmode=require
+    url: jdbc:postgresql://postgres.odtxiqvepwqeeqxjduey:k68oV9RmU8tMel7V@aws-0-eu-west-1.pooler.supabase.com:5432/postgres?sslmode=require
     driver-class-name: org.postgresql.Driver
     hikari:
       connection-timeout: 30000
       maximum-pool-size: 10
+      minimum-idle: 2
+      connection-test-query: SELECT 1
 
   jpa:
+    database: POSTGRESQL
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        temp:
+          use_jdbc_metadata_defaults: false
+        jdbc:
+          lob:
+            non_contextual_creation: true
     show-sql: false
+
+app:
+  jwt:
+    secret: xK9mP2qR5tY8uI3oL7vB4nM1cZ6jF0eW2aX5sD8gJ1kL4
