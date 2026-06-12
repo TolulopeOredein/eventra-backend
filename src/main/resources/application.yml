@@ -31,6 +31,7 @@ google:
     api-key: ${MAPS_API_KEY:}
 
 ---
+---
 # Production profile
 spring:
   config:
@@ -38,7 +39,7 @@ spring:
       on-profile: prod
 
   datasource:
-    url: jdbc:postgresql://postgres.lhqliiutgokossuzdzkn:${DB_PASSWORD}@aws-1-eu-west-1.pooler.supabase.com:5432/postgres?sslmode=require&prepareThreshold=0
+    jdbc-url: jdbc:postgresql://aws-1-eu-west-1.pooler.supabase.com:5432/postgres?sslmode=require&user=postgres.lhqliiutgokossuzdzkn&password=${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
       connection-timeout: 30000
