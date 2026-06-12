@@ -1,21 +1,55 @@
 spring:
+  main:
+    allow-circular-references: true
+
+  application:
+    name: eventra
+
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+
   datasource:
-    url: jdbc:h2:mem:testdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    url: jdbc:postgresql://postgres.odtxiqvepwqeeqxjduey:k68oV9RmU8tMel7V@aws-0-eu-west-1.pooler.supabase.com:5432/postgres?sslmode=require
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 30000
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-test-query: SELECT 1
+
   jpa:
+    database: POSTGRESQL
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: create-drop
-    show-sql: true
+      ddl-auto: update
     properties:
       hibernate:
-        format_sql: true
-  h2:
-    console:
-      enabled: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        temp:
+          use_jdbc_metadata_defaults: false
+        jdbc:
+          lob:
+            non_contextual_creation: true
+    show-sql: false
+
+server:
+  port: ${PORT:8080}
+  address: 0.0.0.0
 
 logging:
   level:
+    root: INFO
     com.eventra: DEBUG
-    org.hibernate.SQL: DEBUG
+    org.hibernate: WARN
+
+app:
+  jwt:
+    secret: xK9mP2qR5tY8uI3oL7vB4nM1cZ6jF0eW2aX5sD8gJ1kL4
+    access-token-expiry: 900000
+    refresh-token-expiry: 604800000
+
+google:
+  maps:
+    api-key: AIzaSyA46QK2NAgB1f1XMSQ34d0ESeYCE2_1RNY
