@@ -28,12 +28,8 @@ app:
 
 google:
   maps:
-    api-key: ${MAPS_API_KEY:} # Maps to the MAPS_API_KEY environment variable in Render
+    api-key: ${MAPS_API_KEY:}
 
-
-
-
----
 ---
 # Production profile
 spring:
@@ -42,24 +38,26 @@ spring:
       on-profile: prod
 
   datasource:
-    url: jdbc:postgresql://postgres.lhqliiutgokossuzdzkn:${DB_PASSWORD}@aws-1-eu-west-1.pooler.supabase.com:5432/postgres?sslmode=require
+    url: jdbc:postgresql://postgres.lhqliiutgokossuzdzkn:${DB_PASSWORD}@aws-1-eu-west-1.pooler.supabase.com:5432/postgres?sslmode=require&prepareThreshold=0
     driver-class-name: org.postgresql.Driver
     hikari:
       connection-timeout: 30000
       maximum-pool-size: 10
+      minimum-idle: 2
 
   jpa:
-    database: POSTGRESQL  # ✅ Add this - tells Spring what database you're using
-    database-platform: org.hibernate.dialect.PostgreSQLDialect  # ✅ Add this - explicit dialect
+    database: POSTGRESQL
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect  # ✅ Add this as well (redundant but safe)
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        temp:
+          use_jdbc_metadata_defaults: false
         jdbc:
           lob:
             non_contextual_creation: true
-        format_sql: false
     show-sql: false
 
 app:
