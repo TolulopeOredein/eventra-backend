@@ -41,7 +41,7 @@ spring:
       on-profile: prod
 
   datasource:
-    url: jdbc:postgresql://aws-1-eu-west-1.pooler.supabase.com:5432/postgres?sslmode=require&user=postgres.lhqliiutgokossuzdzkn&password=${DB_PASSWORD}
+    url: jdbc:postgresql://postgres.lhqliiutgokossuzdzkn:${DB_PASSWORD}@aws-1-eu-west-1.pooler.supabase.com:5432/postgres?sslmode=require
     driver-class-name: org.postgresql.Driver
     hikari:
       connection-timeout: 30000
