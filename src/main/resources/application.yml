@@ -34,6 +34,7 @@ google:
 
 
 ---
+---
 # Production profile
 spring:
   config:
@@ -47,15 +48,18 @@ spring:
       connection-timeout: 30000
       maximum-pool-size: 10
 
-
   jpa:
+    database: POSTGRESQL  # ✅ Add this - tells Spring what database you're using
+    database-platform: org.hibernate.dialect.PostgreSQLDialect  # ✅ Add this - explicit dialect
     hibernate:
-      ddl-auto: update # Hibernate will create/update tables automatically
+      ddl-auto: update
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect  # ✅ Add this as well (redundant but safe)
         jdbc:
           lob:
             non_contextual_creation: true
+        format_sql: false
     show-sql: false
 
 app:
