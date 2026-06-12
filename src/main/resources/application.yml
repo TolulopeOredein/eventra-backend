@@ -11,7 +11,7 @@ spring:
       - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
 
   datasource:
-    url: jdbc:postgresql://postgres.odtxiqvepwqeeqxjduey:k68oV9RmU8tMel7V@aws-0-eu-west-1.pooler.supabase.com:5432/postgres?sslmode=require
+    url: postgresql://postgres.odtxiqvepwoegexjduey:k68oV9RmU8tMel7V@aws-0-eu-west-1.pooler.supabase.com:5432/postgres?sslmode=require
     driver-class-name: org.postgresql.Driver
     hikari:
       connection-timeout: 30000
@@ -21,14 +21,10 @@ spring:
 
   jpa:
     database: POSTGRESQL
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        temp:
-          use_jdbc_metadata_defaults: false
         jdbc:
           lob:
             non_contextual_creation: true
