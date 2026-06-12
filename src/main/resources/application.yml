@@ -32,21 +32,17 @@ google:
 
 ---
 ---
----
----
-# Production profile
 spring:
   config:
     activate:
       on-profile: prod
 
   datasource:
-    url: ${DATABASE_URL}
+    url: jdbc:postgresql://postgres.lhqliiutgokossuzdzkn:ADHwl47TSLEhqKx0@aws-1-eu-west-1.pooler.supabase.com:5432/postgres?sslmode=require
     driver-class-name: org.postgresql.Driver
     hikari:
       connection-timeout: 30000
       maximum-pool-size: 10
-      connection-test-query: SELECT 1
 
   jpa:
     database: POSTGRESQL
@@ -59,7 +55,3 @@ spring:
         temp:
           use_jdbc_metadata_defaults: false
     show-sql: false
-
-app:
-  jwt:
-    secret: ${JWT_SECRET}
