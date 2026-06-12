@@ -33,6 +33,7 @@ google:
 ---
 ---
 ---
+---
 # Production profile
 spring:
   config:
@@ -40,12 +41,11 @@ spring:
       on-profile: prod
 
   datasource:
-    jdbc-url: jdbc:postgresql://postgres.lhqliiutgokossuzdzkn:${DB_PASSWORD}@aws-1-eu-west-1.pooler.supabase.com:5432/postgres?sslmode=require
+    url: ${DATABASE_URL}
     driver-class-name: org.postgresql.Driver
     hikari:
       connection-timeout: 30000
       maximum-pool-size: 10
-      minimum-idle: 2
       connection-test-query: SELECT 1
 
   jpa:
@@ -58,9 +58,6 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         temp:
           use_jdbc_metadata_defaults: false
-        jdbc:
-          lob:
-            non_contextual_creation: true
     show-sql: false
 
 app:
