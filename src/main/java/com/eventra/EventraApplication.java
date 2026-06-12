@@ -15,14 +15,6 @@ public class EventraApplication {
         SpringApplication.run(EventraApplication.class, args);
     }
 
-    @EventListener(ApplicationReadyEvent.class)
-    public void checkDatabaseConnection(DataSource dataSource) {
-        try (Connection conn = dataSource.getConnection()) {
-            System.out.println("✅✅✅ DATABASE CONNECTED SUCCESSFULLY! ✅✅✅");
-            System.out.println("URL: " + conn.getMetaData().getURL());
-        } catch (Exception e) {
-            System.err.println("❌❌❌ DATABASE CONNECTION FAILED! ❌❌❌");
-            System.err.println("Error: " + e.getMessage());
-        }
-    }
+
+
 }

@@ -23,13 +23,13 @@ public class R2Config {
     private String region = "auto";
     private String bucketName;
 
-    @Bean
-    public S3Client r2Client() {
-        return S3Client.builder()
-                .endpointOverride(URI.create(endpoint))
-                .region(Region.of(region))
-                .credentialsProvider(StaticCredentialsProvider.create(
-                        AwsBasicCredentials.create(accessKeyId, secretAccessKey)))
-                .build();
-    }
+//    @Bean
+//    public S3Client r2Client() {
+//        return S3Client.builder()
+//                .endpointOverride(URI.create(endpoint))
+//                .region(Region.of(region))
+//                .credentialsProvider(StaticCredentialsProvider.create(
+//                        AwsBasicCredentials.create(accessKeyId, secretAccessKey)))
+//                .build();
+//    }
 }

@@ -26,17 +26,17 @@ public class LiveCheckInController {
         String gate = message.get("gate");
         String deviceId = message.get("deviceId");
 
-        Map<String, Object> result = checkInService.verifyAndCheckIn(qrData, eventId, deviceId, gate);
+//        Map<String, Object> result = checkInService.verifyAndCheckIn(qrData, eventId, deviceId, gate);
 
         // Broadcast to all connected clients
-        messagingTemplate.convertAndSend("/topic/checkin/" + eventId + "/stats",
-                checkInService.getLiveStats(eventId));
+//        messagingTemplate.convertAndSend("/topic/checkin/" + eventId + "/stats",
+//                checkInService.getLiveStats(eventId));
 
         return CheckInEvent.builder()
-                .guestName((String) result.get("guestName"))
-                .tier((String) result.get("tier"))
+//                .guestName((String) result.get("guestName"))
+//                .tier((String) result.get("tier"))
                 .gate(gate)
-                .timestamp(result.get("checkInTime").toString())
+//                .timestamp(result.get("checkInTime").toString())
                 .build();
     }
 

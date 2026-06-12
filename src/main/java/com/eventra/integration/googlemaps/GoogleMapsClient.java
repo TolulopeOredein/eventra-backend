@@ -1,4 +1,3 @@
-// src/main/java/com/eventra/integration/googlemaps/GoogleMapsClient.java
 package com.eventra.integration.googlemaps;
 
 import com.google.maps.DistanceMatrixApi;
@@ -8,37 +7,37 @@ import com.google.maps.model.DistanceMatrix;
 import com.google.maps.model.DistanceMatrixElement;
 import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.TravelMode;
-import com.eventra.config.GoogleMapsConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 @Slf4j
-@Component  // ← This annotation is CRITICAL
+@Service  // ← Only one annotation: @Service
 @RequiredArgsConstructor
-@Configuration
 public class GoogleMapsClient {
 
+    @Value("${google.maps.api-key}")
+    private String apiKey;
 
-        @Value("${google.maps.api-key}")
-        private String apiKey;
+    private GeoApiContext geoApiContext;
 
-        @Bean
-        public GeoApiContext geoApiContext() {
-            return new GeoApiContext.Builder()
+    // Initialize the GeoApiContext
+    private GeoApiContext getGeoApiContext() {
+        if (geoApiContext == null) {
+            geoApiContext = new GeoApiContext.Builder()
                     .apiKey(apiKey)
                     .build();
         }
-
-
-    private final GeoApiContext geoApiContext;
+        return geoApiContext;
+    }
 
     public DistanceMatrixElement getDistanceAndDuration(String origin, String destination) {
         try {
-            DistanceMatrix result = DistanceMatrixApi.newRequest(geoApiContext)
+            DistanceMatrix result = DistanceMatrixApi.newRequest(getGeoApiContext())
                     .origins(origin)
                     .destinations(destination)
                     .mode(TravelMode.DRIVING)
@@ -56,7 +55,7 @@ public class GoogleMapsClient {
 
     public GeocodingResult[] geocodeAddress(String address) {
         try {
-            return GeocodingApi.geocode(geoApiContext, address).await();
+            return GeocodingApi.geocode(getGeoApiContext(), address).await();
         } catch (Exception e) {
             log.error("Google Maps geocoding failed: {}", e.getMessage());
             return new GeocodingResult[0];

@@ -160,13 +160,13 @@ public class GuestService {
             if (guest.isInviteSent()) continue;
 
             String inviteLink = generateInviteLink(eventId, guest.getId());
-            String qrCodeUrl = qrService.generateQrForGuest(guest, event);
+//            String qrCodeUrl = qrService.generateQrForGuest(guest, event);
 
             guest.setInviteToken(extractTokenFromLink(inviteLink));
-            guest.setQrCodeUrl(qrCodeUrl);
+//            guest.setQrCodeUrl(qrCodeUrl);
             guestRepository.save(guest);
 
-            notificationService.sendInvite(guest, event, inviteLink, qrCodeUrl);
+//            notificationService.sendInvite(guest, event, inviteLink, qrCodeUrl);
 
             guest.setInviteSent(true);
             guest.setInviteSentAt(LocalDateTime.now());
