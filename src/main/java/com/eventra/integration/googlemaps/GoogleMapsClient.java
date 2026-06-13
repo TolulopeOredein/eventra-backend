@@ -1,3 +1,4 @@
+// src/main/java/com/eventra/integration/googlemaps/GoogleMapsClient.java
 package com.eventra.integration.googlemaps;
 
 import com.google.maps.DistanceMatrixApi;
@@ -7,37 +8,38 @@ import com.google.maps.model.DistanceMatrix;
 import com.google.maps.model.DistanceMatrixElement;
 import com.google.maps.model.GeocodingResult;
 import com.google.maps.model.TravelMode;
-import lombok.RequiredArgsConstructor;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Slf4j
-@Service  // ← Only one annotation: @Service
-@RequiredArgsConstructor
+@Service
 public class GoogleMapsClient {
 
-    @Value("${google.maps.api-key}")
-    private String apiKey;
-
+    @Autowired(required = false)
     private GeoApiContext geoApiContext;
 
-    // Initialize the GeoApiContext
-    private GeoApiContext getGeoApiContext() {
-        if (geoApiContext == null) {
-            geoApiContext = new GeoApiContext.Builder()
-                    .apiKey(apiKey)
-                    .build();
+    private boolean isConfigured;
+
+    @PostConstruct
+    public void init() {
+        this.isConfigured = geoApiContext != null;
+        if (isConfigured) {
+            log.info("GoogleMapsClient initialized with API key");
+        } else {
+            log.warn("GoogleMapsClient running in MOCK mode. No API key configured. Map operations will return mock data.");
         }
-        return geoApiContext;
     }
 
     public DistanceMatrixElement getDistanceAndDuration(String origin, String destination) {
+        if (!isConfigured) {
+            log.warn("MOCK MODE: Would calculate distance from '{}' to '{}'", origin, destination);
+            return null;
+        }
+
         try {
-            DistanceMatrix result = DistanceMatrixApi.newRequest(getGeoApiContext())
+            DistanceMatrix result = DistanceMatrixApi.newRequest(geoApiContext)
                     .origins(origin)
                     .destinations(destination)
                     .mode(TravelMode.DRIVING)
@@ -54,11 +56,20 @@ public class GoogleMapsClient {
     }
 
     public GeocodingResult[] geocodeAddress(String address) {
+        if (!isConfigured) {
+            log.warn("MOCK MODE: Would geocode address: '{}'", address);
+            return new GeocodingResult[0];
+        }
+
         try {
-            return GeocodingApi.geocode(getGeoApiContext(), address).await();
+            return GeocodingApi.geocode(geoApiContext, address).await();
         } catch (Exception e) {
             log.error("Google Maps geocoding failed: {}", e.getMessage());
             return new GeocodingResult[0];
         }
+    }
+
+    public boolean isConfigured() {
+        return isConfigured;
     }
 }
